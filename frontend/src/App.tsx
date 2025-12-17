@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/pixelact-ui/button'
 import { Textarea } from '@/components/ui/pixelact-ui/textarea'
 import { Spinner } from '@/components/ui/pixelact-ui/spinner'
 import { Card } from '@/components/ui/pixelact-ui/card'
-import { Loader2, Sparkles, Send } from 'lucide-react'
+import { Loader2, Sparkles } from 'lucide-react'
 import html2canvas from 'html2canvas';
 
 function App() {
@@ -193,13 +193,12 @@ function App() {
                     )}
                 </div>
 
-                <form onSubmit={handleChatSubmit} className="flex gap-2 shrink-0 items-end">
+                <form onSubmit={handleChatSubmit} className="flex gap-2 items-center">
                     <Textarea 
                         placeholder="Ex: 'Make it a Water type'" 
                         value={chatInput} 
                         onChange={(e) => setChatInput(e.target.value)}
                         disabled={chatLoading} 
-                        className="font-pixel text-sm min-h-[50px] max-h-[120px] active:scale-[0.99] transition-transform shadow-sm flex-1 resize-none py-3"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
@@ -208,7 +207,11 @@ function App() {
                         }}
                     />
                     <Button type="submit" disabled={chatLoading} className="bg-yellow-500 text-yellow-950 hover:bg-yellow-400 h-14 w-14 shrink-0 shadow-md border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1">
-                        {chatLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
+                        {chatLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
+                                <polygon points="23 11 23 13 22 13 22 14 21 14 21 15 20 15 20 16 19 16 19 17 18 17 18 18 17 18 17 19 16 19 16 20 15 20 15 21 14 21 14 22 13 22 13 23 12 23 12 22 11 22 11 21 10 21 10 20 11 20 11 19 12 19 12 18 13 18 13 17 14 17 14 16 15 16 15 15 16 15 16 14 1 14 1 10 16 10 16 9 15 9 15 8 14 8 14 7 13 7 13 6 12 6 12 5 11 5 11 4 10 4 10 3 11 3 11 2 12 2 12 1 13 1 13 2 14 2 14 3 15 3 15 4 16 4 16 5 17 5 17 6 18 6 18 7 19 7 19 8 20 8 20 9 21 9 21 10 22 10 22 11 23 11"/>
+                            </svg>
+                        )}
                     </Button>
                 </form>
              </Card>
@@ -219,10 +222,10 @@ function App() {
             {cardData && (
                 <Button 
                     onClick={handleDownload}
-                    className="!absolute !bottom-6 !right-6 !h-14 !w-14 "
+                    className="!absolute !bottom-6 !right-6 !h-14 !w-14"
                     title="Download Card"
                 >
-                </Button>
+                    <svg id="download-solid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="20" width="20" height="3"/><polygon points="20 8 20 10 19 10 19 11 18 11 18 12 17 12 17 13 16 13 16 14 15 14 15 15 14 15 14 16 13 16 13 17 11 17 11 16 10 16 10 15 9 15 9 14 8 14 8 13 7 13 7 12 6 12 6 11 5 11 5 10 4 10 4 8 5 8 5 7 7 7 7 8 8 8 8 9 9 9 9 10 10 10 10 1 14 1 14 10 15 10 15 9 16 9 16 8 17 8 17 7 19 7 19 8 20 8"/></svg>                </Button>
             )}
 
             {/* Background pattern or decoration */}
