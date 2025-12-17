@@ -42,12 +42,12 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
   const typeColor = TYPE_COLORS[data.type] || "bg-gray-200";
 
   return (
-    <Card className={cn("relative w-[420px] aspect-[2.5/3.5] p-4 font-pixel border-4 border-black", typeColor, className)}>
+    <Card className={cn("relative w-[420px] p-4 font-pixel border-4 border-black", typeColor, className)}>
       <div className="h-full w-full bg-white/90 p-3 flex flex-col gap-2 relative overflow-hidden border-2 border-black/10">
         
         {/* Header */}
-        <div className="flex justify-between items-center px-1">
-          <h2 className="font-bold text-xl tracking-tight">{data.name}</h2>
+        <div className="flex justify-between items-center px-1 gap-2">
+          <h2 className="font-bold text-xl tracking-tight truncate max-w-[200px]">{data.name}</h2>
           <div className="flex items-center gap-1 font-bold text-red-600">
              <span className="text-xs text-black font-normal mr-1">HP</span>
              <span className="text-xl">{data.hp}</span>
@@ -72,7 +72,7 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
         </div>
 
         {/* Moves */}
-        <div className="flex-1 flex flex-col gap-2 py-2 overflow-y-auto min-h-0">
+        <div className="flex-1 flex flex-col gap-2 py-2">
             {data.moves.map((move, i) => (
                 <div key={i} className="flex flex-col gap-0.5 animate-in fade-in slide-in-from-bottom-2 duration-500 shrink-0" style={{ animationDelay: `${i * 100}ms` }}>
                     <div className="flex justify-between items-center group hover:bg-black/5 p-1 rounded transition-colors">

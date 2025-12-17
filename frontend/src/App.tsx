@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/pixelact-ui/textarea'
 import { Spinner } from '@/components/ui/pixelact-ui/spinner'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Loader2, Sparkles } from 'lucide-react'
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 
 function App() {
@@ -108,15 +108,18 @@ function App() {
     if (!cardRef.current || !cardData) return;
     
     try {
-        const canvas = await html2canvas(cardRef.current, {
-            backgroundColor: null, // Transparent background if possible, or use card's bg
-            scale: 2, // Higher resolution
-            useCORS: true // For images loaded from external URLs
+        const dataUrl = await toPng(cardRef.current, {
+            quality: 1,
+            pixelRatio: 3,
+            cacheBust: true,
+            style: {
+                transform: 'none', // Remove the scale-125 for accurate export
+            }
         });
         
         const link = document.createElement('a');
         link.download = `pokeprompt-${cardData.name.toLowerCase().replace(/\s+/g, '-')}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.href = dataUrl;
         link.click();
     } catch (err) {
         console.error("Download failed:", err);
@@ -253,8 +256,10 @@ function App() {
 
 
             {cardData ? (
-                    <div ref={cardRef}>
-                        <PokemonCard data={cardData} imageUrl={image!} className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-1 animate-in zoom-in-50 slide-in-from-right-10 shadow-2xl" />
+                    <div className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-1 animate-in zoom-in-50 slide-in-from-right-10">
+                        <div ref={cardRef}>
+                            <PokemonCard data={cardData} imageUrl={image!} className="shadow-2xl" />
+                        </div>
                     </div>
             ) : (
                 <div className="relative h-full w-[500px] flex items-center justify-center select-none pointer-events-none">
