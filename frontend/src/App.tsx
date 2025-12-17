@@ -9,6 +9,7 @@ import { Loader2, Sparkles, LogOut, Library } from 'lucide-react'
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 import { authClient } from './lib/auth';
+import { Avatar } from '@/components/ui/pixelact-ui/avatar'
 
 // API URL from environment variable (empty for dev proxy, full URL for production)
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -198,16 +199,36 @@ function App() {
 
         <div className="flex gap-2 items-center w-auto md:w-40 justify-end">
             {session ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative">
                     <Button variant="secondary" size="sm" onClick={() => setIsDeckOpen(true)} className="hidden md:flex gap-1 items-center">
                         <Library className="h-4 w-4" /> Deck
                     </Button>
-                    <div className="relative group">
-                         <img src={session.user.image || `https://ui-avatars.com/api/?name=${session.user.name}`} alt={session.user.name} className="w-8 h-8 rounded-full border-2 border-white cursor-pointer"/>
-                         <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-50">
-                             <Button size="sm" onClick={() => authClient.signOut()} className="bg-white text-black border-2 border-black">
-                                 <LogOut className="h-4 w-4 mr-2" /> Logout
-                             </Button>
+                    
+                    {/* User Menu Group */}
+                    <div className="relative group py-2"> {/* Added vertical padding to bridge gap */}
+                         <div className="cursor-pointer transition-transform hover:scale-105 active:scale-95">
+                             <Avatar 
+                                src={session.user.image} 
+                                fallback={session.user.name} 
+                                alt={session.user.name}
+                                className="border-2 border-white cursor-pointer"
+                             />
+                         </div>
+                         
+                         {/* Dropdown Menu */}
+                         <div className="absolute right-0 top-[90%] pt-2 hidden group-hover:block z-50 min-w-[120px]">
+                             <div className="bg-white border-4 border-black shadow-[4px_4px_0_0_#000] p-1 flex flex-col gap-1">
+                                 <div className="px-2 py-1 text-xs font-pixel border-b-2 border-slate-100 mb-1 truncate max-w-[150px]">
+                                     {session.user.name}
+                                 </div>
+                                 <Button 
+                                    size="sm" 
+                                    onClick={() => authClient.signOut()} 
+                                    className="bg-red-500 hover:bg-red-400 text-white w-full justify-start h-8 text-xs"
+                                 >
+                                     <LogOut className="h-3 w-3 mr-2" /> Logout
+                                 </Button>
+                             </div>
                          </div>
                     </div>
                 </div>
