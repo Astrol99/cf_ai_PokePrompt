@@ -9,3 +9,15 @@ binding = "AI"
 
 [vars]
 CORS_ORIGIN = "https://pokeprompt.pages.dev"
+BETTER_AUTH_URL = "http://localhost:8787" # Dev, update for prod
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pokeprompt-db"
+database_id = "e405de2b-3c9e-4ebf-ae3c-be25a84cf76c"
+
+# Secrets (Run npx wrangler secret put <NAME>):
+# GEMINI_API_KEY
+# BETTER_AUTH_SECRET
+# GOOGLE_CLIENT_ID
+# GOOGLE_CLIENT_SECRET

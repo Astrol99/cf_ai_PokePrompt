@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/pixelact-ui/button'
 import { Textarea } from '@/components/ui/pixelact-ui/textarea'
 import { Spinner } from '@/components/ui/pixelact-ui/spinner'
 import { Card } from '@/components/ui/pixelact-ui/card'
-import { Loader2, Sparkles } from 'lucide-react'
+import { Loader2, Sparkles, LogOut, Library } from 'lucide-react'
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
+import { authClient } from './lib/auth';
 
 // API URL from environment variable (empty for dev proxy, full URL for production)
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -20,6 +21,13 @@ function App() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'system', content: string }[]>([]);
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
+  
+  const [isDeckOpen, setIsDeckOpen] = useState(false);
+  const [savedCards, setSavedCards] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { data: session } = authClient.useSession();
+
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +53,18 @@ function App() {
       setShouldCelebrate(false);
     }
   }, [shouldCelebrate, cardData]);
+
+  // Fetch deck when opening modal
+  useEffect(() => {
+      if (isDeckOpen && session) {
+          fetch(`${API_URL}/api/cards`)
+            .then(res => res.json())
+            .then(data => {
+              if (Array.isArray(data)) setSavedCards(data);
+            })
+            .catch(console.error);
+      }
+  }, [isDeckOpen, session]);
 
   const handleImageSelected = async (base64: string) => {
     setImage(base64);
@@ -131,17 +151,71 @@ function App() {
     }
   };
 
+  const handleSaveToDeck = async () => {
+      if (!session) {
+          alert("Please login to save cards!");
+          return;
+      }
+      if (!cardData) return;
+
+      setIsSaving(true);
+      try {
+          const res = await fetch(`${API_URL}/api/cards`, {
+              method: 'POST',
+              headers: { 
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ card: cardData })
+          });
+          if(res.ok) {
+              alert("Card saved to your Deck!");
+          } else {
+              throw new Error("Failed to save");
+          }
+      } catch (e) {
+          console.error(e);
+          alert("Error saving card.");
+      } finally {
+          setIsSaving(false);
+      }
+  };
+
+  const handleLogin = async () => {
+      await authClient.signIn.social({
+          provider: "google",
+          callbackURL: window.location.href 
+      });
+  };
+
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden">
-      <header className="pixel-font bg-red-600 text-white p-4 text-center border-b-4 border-black shrink-0 relative shadow-xl z-10">
+      <header className="pixel-font bg-red-600 text-white p-4 text-center border-b-4 border-black shrink-0 relative shadow-xl z-10 flex justify-between items-center">
+        <div className="w-20 hidden md:block"></div> {/* Spacer */}
+        
         <h1 className="text-4xl md:text-5xl text-[#ffcb05] drop-shadow-[-4px_4px_0_#3c5aa6] [-webkit-text-stroke:2px_#3c5aa6]">
           PoKéPrompt
         </h1>
-        <div className="absolute top-1/2 right-4 -translate-y-1/2 w-4 h-4 rounded-full bg-blue-400 border-2 border-white shadow-[0_0_10px_#60a5fa] animate-pulse hidden md:block"></div>
-        <div className="absolute top-1/2 left-4 -translate-y-1/2 gap-1 hidden md:flex">
-             <div className="w-3 h-3 rounded-full bg-red-800 border-2 border-white/50"></div>
-             <div className="w-3 h-3 rounded-full bg-yellow-400 border-2 border-white/50"></div>
-             <div className="w-3 h-3 rounded-full bg-green-500 border-2 border-white/50"></div>
+
+        <div className="flex gap-2 items-center w-auto md:w-40 justify-end">
+            {session ? (
+                <div className="flex items-center gap-2">
+                    <Button variant="secondary" size="sm" onClick={() => setIsDeckOpen(true)} className="hidden md:flex gap-1 items-center">
+                        <Library className="h-4 w-4" /> Deck
+                    </Button>
+                    <div className="relative group">
+                         <img src={session.user.image || `https://ui-avatars.com/api/?name=${session.user.name}`} alt={session.user.name} className="w-8 h-8 rounded-full border-2 border-white cursor-pointer"/>
+                         <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-50">
+                             <Button size="sm" onClick={() => authClient.signOut()} className="bg-white text-black border-2 border-black">
+                                 <LogOut className="h-4 w-4 mr-2" /> Logout
+                             </Button>
+                         </div>
+                    </div>
+                </div>
+            ) : (
+                <Button onClick={handleLogin} className="bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm">
+                    Login
+                </Button>
+            )}
         </div>
       </header>
 
@@ -247,12 +321,27 @@ function App() {
         {/* Right Panel: Card Preview */}
         <div className="w-full md:w-1/2 h-1/2 md:h-full flex justify-center items-center bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200 relative overflow-hidden p-4 md:p-12 order-1 md:order-2">
             {cardData && (
-                <Button 
-                    onClick={handleDownload}
-                    className="!absolute !bottom-6 !right-6 !h-14 !w-14"
-                    title="Download Card"
-                >
-                    <svg id="download-solid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="20" width="20" height="3"/><polygon points="20 8 20 10 19 10 19 11 18 11 18 12 17 12 17 13 16 13 16 14 15 14 15 15 14 15 14 16 13 16 13 17 11 17 11 16 10 16 10 15 9 15 9 14 8 14 8 13 7 13 7 12 6 12 6 11 5 11 5 10 4 10 4 8 5 8 5 7 7 7 7 8 8 8 8 9 9 9 9 10 10 10 10 1 14 1 14 10 15 10 15 9 16 9 16 8 17 8 17 7 19 7 19 8 20 8"/></svg>                </Button>
+                <>
+                <div className="absolute top-6 right-6 flex flex-col gap-2 z-50">
+                     <Button 
+                        onClick={handleDownload}
+                        className="h-14 w-14 bg-blue-500 hover:bg-blue-400 border-4 border-black shadow-[4px_4px_0_0_#000]"
+                        title="Download Card"
+                    >
+                        <svg id="download-solid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6 fill-white"><rect x="2" y="20" width="20" height="3"/><polygon points="20 8 20 10 19 10 19 11 18 11 18 12 17 12 17 13 16 13 16 14 15 14 15 15 14 15 14 16 13 16 13 17 11 17 11 16 10 16 10 15 9 15 9 14 8 14 8 13 7 13 7 12 6 12 6 11 5 11 5 10 4 10 4 8 5 8 5 7 7 7 7 8 8 8 8 9 9 9 9 10 10 10 10 1 14 1 14 10 15 10 15 9 16 9 16 8 17 8 17 7 19 7 19 8 20 8"/></svg>
+                    </Button>
+                    {session && (
+                         <Button 
+                            onClick={handleSaveToDeck}
+                            disabled={isSaving}
+                            className="h-14 w-14 bg-green-500 hover:bg-green-400 border-4 border-black shadow-[4px_4px_0_0_#000]"
+                            title="Save to Deck"
+                        >
+                            {isSaving ? <Spinner className="h-6 w-6 text-white" /> : <Library className="h-6 w-6 text-white" />}
+                        </Button>
+                    )}
+                </div>
+                </>
             )}
 
             {/* Background pattern or decoration */}
@@ -281,6 +370,38 @@ function App() {
             )}
         </div>
       </main>
+
+      {/* Deck Modal */}
+      {isDeckOpen && (
+          <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+              <Card className="w-full max-w-4xl h-[80vh] flex flex-col bg-slate-100 border-4 border-black shadow-2xl relative">
+                  <div className="p-4 border-b-4 border-black flex justify-between items-center bg-red-600 text-white">
+                      <h2 className="font-pixel text-2xl flex items-center gap-2"><Library /> My Deck</h2>
+                      <Button onClick={() => setIsDeckOpen(false)} className="bg-red-800 hover:bg-red-900 border-white text-white">Close</Button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-8 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200">
+                      {savedCards.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4">
+                              <Library className="h-16 w-16 opacity-50" />
+                              <p className="font-pixel text-xl">Your deck is empty!</p>
+                              <p className="text-sm">Generate some cards and save them here.</p>
+                          </div>
+                      ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                              {savedCards.map((card) => {
+                                  const cardContent = typeof card.data === 'string' ? JSON.parse(card.data) : card.data;
+                                  return (
+                                      <div key={card.id} className="scale-75 origin-top-left">
+                                         <PokemonCard data={cardContent} imageUrl={card.imageUrl || "https://via.placeholder.com/400"} />
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                      )}
+                  </div>
+              </Card>
+          </div>
+      )}
     </div>
   )
 }

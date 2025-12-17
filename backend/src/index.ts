@@ -1,17 +1,87 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { initAuth } from './auth'
 
 type Bindings = {
   AI: any
+  DB: D1Database
+  GOOGLE_CLIENT_ID: string
+  GOOGLE_CLIENT_SECRET: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.use('/*', cors())
+app.use('/*', cors({
+  origin: ["http://localhost:5173", "https://pokeprompt.pages.dev"],
+  allowHeaders: ["Content-Type", "Authorization"],
+  allowMethods: ["POST", "GET", "OPTIONS"],
+  exposeHeaders: ["Content-Length"],
+  maxAge: 600,
+  credentials: true,
+}))
+
+app.on(['POST', 'GET'], '/api/auth/**', (c) => {
+    const auth = initAuth(c.env);
+    return auth.handler(c.req.raw);
+});
 
 app.get('/', (c) => {
   return c.text('Hello PokePrompt!')
 })
+
+// === Deck Storage APIs ===
+
+// Save a card to the deck
+app.post('/api/cards', async (c) => {
+    const auth = initAuth(c.env);
+    const session = await auth.api.getSession({
+        headers: c.req.raw.headers
+    });
+    
+    if (!session) {
+        return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const { card } = await c.req.json();
+    if (!card) return c.json({ error: "Card data required" }, 400);
+
+    const id = crypto.randomUUID();
+    const now = Date.now();
+
+    try {
+        await c.env.DB.prepare(
+            "INSERT INTO card (id, userId, name, data, createdAt) VALUES (?, ?, ?, ?, ?)"
+        ).bind(id, session.user.id, card.name, JSON.stringify(card), now).run();
+
+        return c.json({ success: true, id });
+    } catch (e: any) {
+        return c.json({ error: e.message }, 500);
+    }
+});
+
+// Get user's deck
+app.get('/api/cards', async (c) => {
+    const auth = initAuth(c.env);
+    const session = await auth.api.getSession({
+        headers: c.req.raw.headers
+    });
+
+    if (!session) {
+        return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    try {
+        const { results } = await c.env.DB.prepare(
+            "SELECT * FROM card WHERE userId = ? ORDER BY createdAt DESC"
+        ).bind(session.user.id).all();
+
+        return c.json(results);
+    } catch (e: any) {
+        return c.json({ error: e.message }, 500);
+    }
+});
+
+// === Generation APIs ===
 
 app.post('/api/generate', async (c) => {
   try {
