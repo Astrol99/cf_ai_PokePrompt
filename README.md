@@ -2,6 +2,8 @@
 
 Turn any image into a custom Pokemon-style trading card using AI.
 
+Try it out at https://pokeprompt.pages.dev!
+
 ![PokePrompt](./PokePrompt.png)
 
 ## Features
