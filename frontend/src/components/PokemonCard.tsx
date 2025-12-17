@@ -41,23 +41,23 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
   const typeColor = TYPE_COLORS[data.type] || "bg-gray-200";
 
   return (
-    <Card className={cn("relative w-[350px] aspect-[2.5/3.5] p-3 font-pixel border-2 border-black", typeColor, className)}>
-      <div className="h-full w-full bg-white/90 p-2 flex flex-col gap-2 relative overflow-hidden border-2 border-black/10">
+    <Card className={cn("relative w-[420px] aspect-[2.5/3.5] p-4 font-pixel border-4 border-black", typeColor, className)}>
+      <div className="h-full w-full bg-white/90 p-3 flex flex-col gap-2 relative overflow-hidden border-2 border-black/10">
         
         {/* Header */}
         <div className="flex justify-between items-center px-1">
-          <h2 className="font-bold text-lg tracking-tight">{data.name}</h2>
+          <h2 className="font-bold text-xl tracking-tight">{data.name}</h2>
           <div className="flex items-center gap-1 font-bold text-red-600">
              <span className="text-xs text-black font-normal mr-1">HP</span>
-             <span className="text-lg">{data.hp}</span>
-             <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-[10px] border border-black/20", typeColor)}>
+             <span className="text-xl">{data.hp}</span>
+             <span className={cn("w-8 h-8 rounded-full flex items-center justify-center text-xs border-2 border-black/20", typeColor)}>
                {data.type.slice(0, 1)}
              </span>
           </div>
         </div>
 
         {/* Image */}
-        <div className="w-full aspect-square bg-slate-100 border-2 border-black/10 shadow-inner overflow-hidden relative">
+        <div className="w-full aspect-[4/3] bg-slate-100 border-2 border-black/10 shadow-inner overflow-hidden relative shrink-0">
             {imageUrl ? (
                 <img src={imageUrl} alt={data.name} className="w-full h-full object-cover" />
             ) : (
@@ -71,21 +71,21 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
         </div>
 
         {/* Moves */}
-        <div className="flex-1 flex flex-col gap-3 py-2 overflow-y-auto">
+        <div className="flex-1 flex flex-col gap-2 py-2 overflow-y-auto min-h-0">
             {data.moves.map((move, i) => (
-                <div key={i} className="flex flex-col gap-0.5 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${i * 100}ms` }}>
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-1">
+                <div key={i} className="flex flex-col gap-0.5 animate-in fade-in slide-in-from-bottom-2 duration-500 shrink-0" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="flex justify-between items-center group hover:bg-black/5 p-1 rounded transition-colors">
+                        <div className="flex items-center gap-2">
                            <div className="flex gap-0.5">
                                {move.cost.map((c, idx) => (
                                    <div key={idx} className={cn("w-4 h-4 rounded-full shadow-sm border border-black/10", TYPE_COLORS[c] || "bg-gray-100")}></div>
                                ))}
                            </div>
-                           <span className="font-bold text-sm ml-1">{move.name}</span>
+                           <span className="font-bold text-xs ml-1">{move.name}</span>
                         </div>
-                        <span className="font-bold text-lg">{move.damage}</span>
+                        <span className="font-bold text-xs">{move.damage}</span>
                     </div>
-                    {move.description && <p className="text-[10px] text-muted-foreground leading-tight px-1">{move.description}</p>}
+                    {move.description && <p className="text-[6px] text-muted-foreground leading-snug px-1">{move.description}</p>}
                 </div>
             ))}
         </div>

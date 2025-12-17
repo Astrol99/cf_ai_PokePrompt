@@ -63,8 +63,8 @@ function App() {
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden">
       <header className="pixel-font bg-red-600 text-white p-4 text-center border-b-4 border-black shrink-0 relative shadow-xl z-10">
-        <h1 className="text-2xl md:text-3xl tracking-widest uppercase drop-shadow-md">
-          PokePrompt
+        <h1 className="text-2xl md:text-3xl tracking-widest drop-shadow-md">
+          PokéPrompt
         </h1>
         <div className="absolute top-1/2 right-4 -translate-y-1/2 w-4 h-4 rounded-full bg-blue-400 border-2 border-white shadow-[0_0_10px_#60a5fa] animate-pulse hidden md:block"></div>
         <div className="absolute top-1/2 left-4 -translate-y-1/2 flex gap-1 hidden md:flex">
