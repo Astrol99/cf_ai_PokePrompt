@@ -13,6 +13,7 @@
     "@hackernoon/pixel-icon-library": "^1.0.6",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.561.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/html2canvas": "^1.0.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",

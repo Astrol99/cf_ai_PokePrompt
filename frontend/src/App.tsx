@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/pixelact-ui/spinner'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Loader2, Sparkles } from 'lucide-react'
 import html2canvas from 'html2canvas';
+import confetti from 'canvas-confetti';
 
 function App() {
   const [image, setImage] = useState<string | null>(null);
@@ -15,6 +16,7 @@ function App() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'system', content: string }[]>([]);
+  const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +25,23 @@ function App() {
         chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
   }, [chatHistory, chatLoading]);
+
+  // Confetti celebration after card renders
+  useEffect(() => {
+    if (shouldCelebrate && cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = (rect.left + rect.width / 2) / window.innerWidth;
+      const y = rect.top / window.innerHeight;
+      
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { x, y }
+      });
+      
+      setShouldCelebrate(false);
+    }
+  }, [shouldCelebrate, cardData]);
 
   const handleImageSelected = async (base64: string) => {
     setImage(base64);
@@ -38,6 +57,7 @@ function App() {
       if (!response.ok) throw new Error('Generation failed');
       const data = await response.json();
       setCardData(data);
+      setShouldCelebrate(true); // Trigger celebration after render
     } catch (error) {
       console.error(error);
       alert("Failed to generate card. Check console.");
