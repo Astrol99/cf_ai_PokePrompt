@@ -46,6 +46,7 @@ app.post('/api/generate', async (c) => {
       "hp": "Integer (e.g. 120)",
       "type": "One of [Fire, Water, Grass, Electric, Psychic, Fighting, Darkness, Metal, Fairy, Dragon, Colorless]",
       "description": "Flavor text about the creature",
+      "creatureType": "String (e.g. 'Human', 'Alien', 'Robot', 'Monster', etc.)",
       "moves": [
          { "name": "Move Name", "damage": "String (e.g. 30+)", "cost": ["Colorless", "Fire"], "description": "Effect description" }
       ],

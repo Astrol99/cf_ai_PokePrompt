@@ -6,6 +6,7 @@ export interface CardData {
   hp: string | number;
   type: string;
   description: string;
+  creatureType?: string;
   moves: Array<{
     name: string;
     damage: string;
@@ -67,7 +68,7 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
 
         {/* Info Bar (optional, like 'Basic Pokemon') */}
         <div className="w-full bg-gradient-to-r from-yellow-300 to-yellow-500 h-6 px-2 flex items-center justify-center text-[10px] italic font-semibold text-yellow-900 shadow-sm rounded-sm">
-            AI Generated Pocket Monster
+            {data.creatureType || "AI Generated Pocket Monster"}
         </div>
 
         {/* Moves */}
