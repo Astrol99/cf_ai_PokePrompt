@@ -256,7 +256,7 @@ function App() {
 
 
             {cardData ? (
-                    <div className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-1 animate-in zoom-in-50 slide-in-from-right-10">
+                    <div className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-2 animate-in zoom-in-50 slide-in-from-right-10">
                         <div ref={cardRef}>
                             <PokemonCard data={cardData} imageUrl={image!} className="shadow-2xl" />
                         </div>
