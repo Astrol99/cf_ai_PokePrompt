@@ -9,6 +9,9 @@ import { Loader2, Sparkles } from 'lucide-react'
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 
+// API URL from environment variable (empty for dev proxy, full URL for production)
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function App() {
   const [image, setImage] = useState<string | null>(null);
   const [cardData, setCardData] = useState<CardData | null>(null);
@@ -49,7 +52,7 @@ function App() {
     setCardData(null);
     setChatHistory([]); // Reset chat on new image
     try {
-      const response = await fetch('/api/generate', {
+      const response = await fetch(`${API_URL}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64 }),
@@ -76,7 +79,7 @@ function App() {
     setChatLoading(true);
 
     try {
-       const response = await fetch('/api/chat', {
+       const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

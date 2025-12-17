@@ -79,3 +79,27 @@ PokePrompt/
 │   └── package.json
 └── README.md
 ```
+
+## Deployment (Cloudflare)
+
+### 1. Deploy Backend (Workers)
+
+```bash
+cd backend
+pnpm deploy
+```
+
+Your API will be live at `https://pokeprompt-api.<your-subdomain>.workers.dev`
+
+### 2. Deploy Frontend (Pages)
+
+First, update `frontend/.env.production` with your Worker URL:
+```bash
+VITE_API_URL=https://pokeprompt-api.<your-subdomain>.workers.dev
+```
+
+Then deploy:
+```bash
+cd frontend
+pnpm deploy
+```
