@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/pixelact-ui/card";
 import { cn } from "@/lib/utils";
 
 export interface CardData {
@@ -40,8 +41,8 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
   const typeColor = TYPE_COLORS[data.type] || "bg-gray-200";
 
   return (
-    <div className={cn("relative w-[350px] aspect-[2.5/3.5] rounded-xl p-3 shadow-xl font-sans", typeColor, className)}>
-      <div className="h-full w-full bg-white/90 rounded-lg p-2 flex flex-col gap-2 relative overflow-hidden backdrop-blur-sm border border-black/10">
+    <Card className={cn("relative w-[350px] aspect-[2.5/3.5] p-3 font-pixel border-2 border-black", typeColor, className)}>
+      <div className="h-full w-full bg-white/90 p-2 flex flex-col gap-2 relative overflow-hidden border-2 border-black/10">
         
         {/* Header */}
         <div className="flex justify-between items-center px-1">
@@ -56,7 +57,7 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
         </div>
 
         {/* Image */}
-        <div className="w-full aspect-square bg-slate-100 rounded border border-black/10 shadow-inner overflow-hidden relative">
+        <div className="w-full aspect-square bg-slate-100 border-2 border-black/10 shadow-inner overflow-hidden relative">
             {imageUrl ? (
                 <img src={imageUrl} alt={data.name} className="w-full h-full object-cover" />
             ) : (
@@ -121,6 +122,6 @@ export function PokemonCard({ data, imageUrl, className }: PokemonCardProps) {
          </div>
 
       </div>
-    </div>
+    </Card>
   );
 }

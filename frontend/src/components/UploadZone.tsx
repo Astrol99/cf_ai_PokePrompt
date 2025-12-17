@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/pixelact-ui/card";
 import { cn } from "@/lib/utils";
+
 
 interface UploadZoneProps {
   onImageSelected: (base64: string) => void;

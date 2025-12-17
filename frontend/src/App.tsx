@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { UploadZone } from './components/UploadZone'
 import { PokemonCard, type CardData } from './components/PokemonCard'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/pixelact-ui/button'
+import { Input } from '@/components/ui/pixelact-ui/input'
+import { Card } from '@/components/ui/pixelact-ui/card'
 import { Loader2, Sparkles, Send } from 'lucide-react'
 
 function App() {
@@ -86,8 +86,8 @@ function App() {
                         </div>
                     )}
                 </div>
-                <Button variant="outline" onClick={() => { setImage(null); setCardData(null); }} disabled={loading}>
-                    Upload New Image
+                <Button variant="secondary" onClick={() => { setImage(null); setCardData(null); }} disabled={loading}>
+                  Switch Image
                 </Button>
              </Card>
            )}
@@ -105,7 +105,7 @@ function App() {
                         onChange={(e) => setChatInput(e.target.value)}
                         disabled={chatLoading} 
                     />
-                    <Button type="submit" size="icon" disabled={chatLoading}>
+                    <Button type="submit" disabled={chatLoading}>
                         {chatLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                     </Button>
                 </form>
