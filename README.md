@@ -2,7 +2,7 @@
 
 Turn any image into a custom Pokemon-style trading card using AI.
 
-![PokePrompt Demo](https://via.placeholder.com/800x400?text=PokePrompt+Demo)
+![PokePrompt](./PokePrompt.png)
 
 ## Features
 
@@ -51,7 +51,7 @@ Turn any image into a custom Pokemon-style trading card using AI.
 
 5. Open http://localhost:5173 in your browser
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Frontend:**
 - React + Vite
@@ -64,7 +64,7 @@ Turn any image into a custom Pokemon-style trading card using AI.
 - Node.js + Express
 - Google Gemini AI API
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 PokePrompt/
@@ -79,7 +79,3 @@ PokePrompt/
 │   └── package.json
 └── README.md
 ```
-
-## 📝 License
-
-MIT
