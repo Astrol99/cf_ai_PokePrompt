@@ -84,18 +84,14 @@ app.post('/api/chat', async (c) => {
      Return ONLY the JSON.
      `;
 
-    const response = await c.env.AI.run('@cf/meta/llama-3.3-70b-instruct', {
+    const response = await c.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
       messages: [
         { role: 'system', content: systemPrompt },
         ...messages
       ]
     });
-
-    let jsonString = response.response as string;
-    jsonString = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
-    const updatedCard = JSON.parse(jsonString);
     
-    return c.json(updatedCard);
+    return c.json(response.response);
     
   } catch (error: any) {
      return c.json({ error: error.message }, 500);

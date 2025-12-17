@@ -2,74 +2,12 @@ import { useState } from 'react'
 import { UploadZone } from './components/UploadZone'
 import { PokemonCard, type CardData } from './components/PokemonCard'
 import { Button } from '@/components/ui/pixelact-ui/button'
-import { Input } from '@/components/ui/pixelact-ui/input'
+import { Textarea } from '@/components/ui/pixelact-ui/textarea'
+import { Spinner } from '@/components/ui/pixelact-ui/spinner'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Loader2, Sparkles, Send } from 'lucide-react'
 
-import { useRef, useEffect } from 'react'
 
-const TERMINAL_LOGS = [
-  "Initializing neural link...",
-  "Scanning pixel matrix...",
-  "Detecting creature contours...",
-  "Analyzing color palette...",
-  "Matching species signature...",
-  "Querying regional pokedex...",
-  "Calculating base stats...",
-  "Assigning move set...",
-  "Generating flavor text...",
-  "Compiling card data...",
-  "Finalizing render..."
-];
-
-function TerminalLoader() {
-  const [logs, setLogs] = useState<string[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (currentIndex < TERMINAL_LOGS.length) {
-        setLogs(prev => [...prev, TERMINAL_LOGS[currentIndex]]);
-        currentIndex++;
-      } else {
-        // Loop or stay? Let's loop for continuous effect
-        setLogs([]);
-        currentIndex = 0;
-      }
-    }, 800); // Speed of logs
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [logs]);
-
-  return (
-    <div className="relative w-[320px] md:w-[420px] aspect-[2.5/3.5] bg-black border-4 border-gray-800 rounded-lg flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 font-mono text-xs md:text-sm text-green-500 p-4">
-        {/* CRT Scanline Effect */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 bg-[length:100%_4px,3px_100%] pointer-events-none"></div>
-        
-        <div className="border-b border-green-500/50 pb-2 mb-2 flex justify-between items-center opacity-70">
-            <span>PokéPrompt_V1.0</span>
-            <span className="animate-pulse">ONLINE</span>
-        </div>
-
-        <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-1 scrollbar-hide">
-            {logs.map((log, i) => (
-                <div key={i} className="flex gap-2 animate-in fade-in slide-in-from-left-2 md:tracking-wider">
-                    <span className="opacity-50">&gt;</span>
-                    <span>{log}</span>
-                </div>
-            ))}
-            <div className="animate-pulse">_</div>
-        </div>
-    </div>
-  );
-}
 
 function App() {
   const [image, setImage] = useState<string | null>(null);
@@ -107,7 +45,7 @@ function App() {
     try {
        const response = await fetch('/api/chat', {
         method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             messages: [{ role: 'user', content: chatInput }],
             currentCard: cardData 
@@ -193,16 +131,16 @@ function App() {
                     </div>
                 </div>
 
-                <form onSubmit={handleChatSubmit} className="flex gap-2 shrink-0">
-                    <Input 
+                <form onSubmit={handleChatSubmit} className="flex gap-2 shrink-0 items-end">
+                    <Textarea 
                         placeholder="Ex: 'Make it a Water type'" 
                         value={chatInput} 
                         onChange={(e) => setChatInput(e.target.value)}
                         disabled={chatLoading} 
-                        className="font-pixel text-sm h-12 active:scale-[0.99] transition-transform shadow-sm flex-1"
+                        className="font-pixel text-sm min-h-[50px] max-h-[120px] active:scale-[0.99] transition-transform shadow-sm flex-1 resize-none py-3"
                     />
-                    <Button type="submit" disabled={chatLoading} className="bg-yellow-500 text-yellow-950 hover:bg-yellow-400 h-12 w-12 shrink-0">
-                        {chatLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                    <Button type="submit" disabled={chatLoading} className="bg-yellow-500 text-yellow-950 hover:bg-yellow-400 h-14 w-14 shrink-0 shadow-md border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1">
+                        {chatLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
                     </Button>
                 </form>
              </Card>
@@ -217,21 +155,17 @@ function App() {
             {cardData ? (
                 <PokemonCard data={cardData} imageUrl={image!} className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-1 animate-in zoom-in-50 slide-in-from-right-10 shadow-2xl" />
             ) : (
-                !loading && image && (
-                    <div className="text-center text-muted-foreground flex flex-col items-center justify-center h-full gap-6 opacity-70 animate-pulse">
-                         <Loader2 className="h-16 w-16 animate-spin text-red-500" />
-                         <p className="font-pixel text-sm">Generating Data...</p>
-                    </div>
-                )
-            )}
-            
-            {loading && image && <TerminalLoader />}
-            
-            {!image && !loading && (
-                <div className="h-full w-[500px] opacity-40 select-none pointer-events-none flex flex-col items-center justify-center gap-4">
-                   <div className="w-full h-full border-4 border-dashed border-slate-400 rounded-lg flex items-center justify-center bg-slate-100/50">
-                        <span className="font-pixel text-xs text-slate-500">Make a card out of anything...</span>
-                   </div>
+                <div className="relative h-full w-[500px] flex items-center justify-center select-none pointer-events-none">
+                     <div className={`w-full h-full border-4 border-dashed border-slate-400 rounded-lg flex items-center justify-center bg-slate-100/50 transition-all duration-500 ${loading ? 'blur-sm opacity-30 scale-95' : 'opacity-40'}`}>
+                          <span className="font-pixel text-xs text-slate-500">Make a card out of anything...</span>
+                     </div>
+                     
+                     {loading && (
+                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10 animate-in fade-in zoom-in duration-300">
+                             <Spinner className="h-16 w-16" />
+                             <p className="font-pixel text-sm animate-pulse tracking-widest text-slate-500 bg-white/50 px-2 rounded backdrop-blur-sm">PROCESSING...</p>
+                         </div>
+                     )}
                 </div>
             )}
         </div>
