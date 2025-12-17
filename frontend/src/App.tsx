@@ -165,7 +165,7 @@ function App() {
               headers: { 
                   'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ card: cardData })
+              body: JSON.stringify({ card: cardData, image })
           });
           if(res.ok) {
               alert("Card saved to your Deck!");

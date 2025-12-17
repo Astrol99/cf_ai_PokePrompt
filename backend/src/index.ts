@@ -42,7 +42,7 @@ app.post('/api/cards', async (c) => {
         return c.json({ error: "Unauthorized" }, 401);
     }
 
-    const { card } = await c.req.json();
+    const { card, image } = await c.req.json();
     if (!card) return c.json({ error: "Card data required" }, 400);
 
     const id = crypto.randomUUID();
@@ -50,8 +50,8 @@ app.post('/api/cards', async (c) => {
 
     try {
         await c.env.DB.prepare(
-            "INSERT INTO card (id, userId, name, data, createdAt) VALUES (?, ?, ?, ?, ?)"
-        ).bind(id, session.user.id, card.name, JSON.stringify(card), now).run();
+            "INSERT INTO card (id, userId, name, data, imageUrl, createdAt) VALUES (?, ?, ?, ?, ?, ?)"
+        ).bind(id, session.user.id, card.name, JSON.stringify(card), image || null, now).run();
 
         return c.json({ success: true, id });
     } catch (e: any) {
