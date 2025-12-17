@@ -6,6 +6,71 @@ import { Input } from '@/components/ui/pixelact-ui/input'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Loader2, Sparkles, Send } from 'lucide-react'
 
+import { useRef, useEffect } from 'react'
+
+const TERMINAL_LOGS = [
+  "Initializing neural link...",
+  "Scanning pixel matrix...",
+  "Detecting creature contours...",
+  "Analyzing color palette...",
+  "Matching species signature...",
+  "Querying regional pokedex...",
+  "Calculating base stats...",
+  "Assigning move set...",
+  "Generating flavor text...",
+  "Compiling card data...",
+  "Finalizing render..."
+];
+
+function TerminalLoader() {
+  const [logs, setLogs] = useState<string[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let currentIndex = 0;
+    const interval = setInterval(() => {
+      if (currentIndex < TERMINAL_LOGS.length) {
+        setLogs(prev => [...prev, TERMINAL_LOGS[currentIndex]]);
+        currentIndex++;
+      } else {
+        // Loop or stay? Let's loop for continuous effect
+        setLogs([]);
+        currentIndex = 0;
+      }
+    }, 800); // Speed of logs
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  return (
+    <div className="relative w-[320px] md:w-[420px] aspect-[2.5/3.5] bg-black border-4 border-gray-800 rounded-lg flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 font-mono text-xs md:text-sm text-green-500 p-4">
+        {/* CRT Scanline Effect */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 bg-[length:100%_4px,3px_100%] pointer-events-none"></div>
+        
+        <div className="border-b border-green-500/50 pb-2 mb-2 flex justify-between items-center opacity-70">
+            <span>PokéPrompt_V1.0</span>
+            <span className="animate-pulse">ONLINE</span>
+        </div>
+
+        <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-1 scrollbar-hide">
+            {logs.map((log, i) => (
+                <div key={i} className="flex gap-2 animate-in fade-in slide-in-from-left-2 md:tracking-wider">
+                    <span className="opacity-50">&gt;</span>
+                    <span>{log}</span>
+                </div>
+            ))}
+            <div className="animate-pulse">_</div>
+        </div>
+    </div>
+  );
+}
+
 function App() {
   const [image, setImage] = useState<string | null>(null);
   const [cardData, setCardData] = useState<CardData | null>(null);
@@ -145,6 +210,8 @@ function App() {
                     </div>
                 )
             )}
+            
+            {loading && image && <TerminalLoader />}
             
             {!image && !loading && (
                 <div className="h-[400px] w-[300px] opacity-40 select-none pointer-events-none flex flex-col items-center justify-center gap-4">
