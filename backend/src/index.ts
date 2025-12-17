@@ -82,36 +82,27 @@ app.post('/api/chat', async (c) => {
      
      The trainer will issue a command to modify you or your stats.
      1. Update the JSON card data to reflect the changes requested.
-     2. Generate a short, valid in-character response (1-2 sentences) acknowledging the change or commenting on your new power.
+     2. Generate a short, valid in-character response (1-2 sentences) acknowledging the change.
+     For example, if the trainer asks you to "evolve" you, you might respond with "Pikachu feels an overwhelming power coursing through its body!"
      
      Return a JSON object with this EXACT structure:
      {
-       "card": { ...the full updated card data... },
-       "response": "Your in-character text string here"
+       "card": { ...only parts of the card that changed... },
+       "response": "Your in-character response string here"
      }
      Return ONLY the JSON object. Do not wrap in markdown.
      `;
  
-     const response = await c.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+     const response = await c.env.AI.run('@cf/meta/llama-2-7b-chat-int8', {
        messages: [
          { role: 'system', content: systemPrompt },
          ...messages
        ]
      });
+
+     console.log(response.response);  
      
-     try {
-       // Attempt to parse to ensure validity before sending, although we trust the client to handle it mostly
-       // formatting might need cleanup if AI adds markdown
-       let raw = response.response;
-       if (typeof raw === 'string') {
-          // simple cleanup if it wraps in ```json ... ```
-          raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
-       }
-       return c.json(JSON.parse(typeof raw === 'string' ? raw : JSON.stringify(raw)));
-     } catch (e) {
-       // Fallback if parsing fails, just send raw and let frontend fail or handle
-       return c.json(response.response);
-     }
+     return c.json(JSON.parse(response.response));
   } catch (error: any) {
      return c.json({ error: error.message }, 500);
   }

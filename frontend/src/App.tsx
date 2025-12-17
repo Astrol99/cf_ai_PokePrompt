@@ -88,11 +88,12 @@ function App() {
       const data = await response.json();
       
       if (data.card && data.response) {
-          setCardData(data.card);
+          // Merge partial updates with existing card data
+          setCardData(prev => prev ? { ...prev, ...data.card } : data.card);
           setChatHistory(prev => [...prev, { role: 'system', content: data.response }]);
       } else if (data.name) { 
           // Fallback if backend sends old format for some reason
-          setCardData(data);
+          setCardData(prev => prev ? { ...prev, ...data } : data);
           setChatHistory(prev => [...prev, { role: 'system', content: "Card updated." }]);
       }
     } catch (error) {
@@ -172,7 +173,7 @@ function App() {
                 </div>
              </Card>
            ) : (
-             <Card className="p-6 flex flex-col gap-6 bg-yellow-50 border-4 border-yellow-600 shadow-[4px_4px_0px_0px_rgba(202,138,4,1)] animate-in slide-in-from-bottom-5 flex-1 h-full relative overflow-hidden">
+             <Card className="p-6 flex flex-col gap-6 bg-yellow-50 border-4 border-yellow-600 shadow-[4px_4px_0px_0px_rgba(202,138,4,1)] animate-in slide-in-from-bottom-5 h-1/2 md:h-full md:flex-1 relative overflow-hidden order-2 md:order-1">
                 <div className="flex justify-between items-center border-b-2 border-yellow-600/20 pb-4">
                     <h3 className="font-pixel text-lg md:text-xl flex items-center gap-2 text-yellow-800 uppercase tracking-wider">
                         <Sparkles className="h-5 w-5" />
@@ -241,7 +242,7 @@ function App() {
            )}
 
         {/* Right Panel: Card Preview */}
-        <div className="w-full md:w-1/2 h-full flex justify-center items-center bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200 relative overflow-hidden p-8 md:p-12">
+        <div className="w-full md:w-1/2 h-1/2 md:h-full flex justify-center items-center bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200 relative overflow-hidden p-4 md:p-12 order-1 md:order-2">
             {cardData && (
                 <Button 
                     onClick={handleDownload}
@@ -256,7 +257,7 @@ function App() {
 
 
             {cardData ? (
-                    <div className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-2 animate-in zoom-in-50 slide-in-from-right-10">
+                    <div className="scale-50 md:scale-125 transition-all duration-700 hover:rotate-2 animate-in zoom-in-50 slide-in-from-right-10">
                         <div ref={cardRef}>
                             <PokemonCard data={cardData} imageUrl={image!} className="shadow-2xl" />
                         </div>
