@@ -77,22 +77,41 @@ app.post('/api/chat', async (c) => {
      const { messages, currentCard } = await c.req.json();
      
      const systemPrompt = `
-     You are assisting a user in editing a Pokemon card.
+     You are the creature on this Pokemon card. You are talking to your trainer (the user).
      Current Card Data: ${JSON.stringify(currentCard)}
      
-     The user will ask to change something. Update the JSON and return the FULL updated JSON object.
-     Return ONLY the JSON.
+     The trainer will issue a command to modify you or your stats.
+     1. Update the JSON card data to reflect the changes requested.
+     2. Generate a short, valid in-character response (1-2 sentences) acknowledging the change or commenting on your new power.
+     
+     Return a JSON object with this EXACT structure:
+     {
+       "card": { ...the full updated card data... },
+       "response": "Your in-character text string here"
+     }
+     Return ONLY the JSON object. Do not wrap in markdown.
      `;
-
-    const response = await c.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages
-      ]
-    });
-    
-    return c.json(response.response);
-    
+ 
+     const response = await c.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+       messages: [
+         { role: 'system', content: systemPrompt },
+         ...messages
+       ]
+     });
+     
+     try {
+       // Attempt to parse to ensure validity before sending, although we trust the client to handle it mostly
+       // formatting might need cleanup if AI adds markdown
+       let raw = response.response;
+       if (typeof raw === 'string') {
+          // simple cleanup if it wraps in ```json ... ```
+          raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+       }
+       return c.json(JSON.parse(typeof raw === 'string' ? raw : JSON.stringify(raw)));
+     } catch (e) {
+       // Fallback if parsing fails, just send raw and let frontend fail or handle
+       return c.json(response.response);
+     }
   } catch (error: any) {
      return c.json({ error: error.message }, 500);
   }

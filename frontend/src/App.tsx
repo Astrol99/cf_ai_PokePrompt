@@ -7,7 +7,7 @@ import { Spinner } from '@/components/ui/pixelact-ui/spinner'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Loader2, Sparkles, Send } from 'lucide-react'
 
-
+import { useRef, useEffect } from 'react'
 
 function App() {
   const [image, setImage] = useState<string | null>(null);
@@ -15,11 +15,20 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'system', content: string }[]>([]);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (chatScrollRef.current) {
+        chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatHistory, chatLoading]);
 
   const handleImageSelected = async (base64: string) => {
     setImage(base64);
     setLoading(true);
     setCardData(null);
+    setChatHistory([]); // Reset chat on new image
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -41,22 +50,34 @@ function App() {
     e.preventDefault();
     if (!chatInput.trim() || !cardData) return;
 
+    const userMessage = chatInput.trim();
+    setChatHistory(prev => [...prev, { role: 'user', content: userMessage }]);
+    setChatInput("");
     setChatLoading(true);
+
     try {
        const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            messages: [{ role: 'user', content: chatInput }],
+            messages: [{ role: 'user', content: userMessage }],
             currentCard: cardData 
         }),
       });
       if (!response.ok) throw new Error('Chat failed');
       const data = await response.json();
-      setCardData(data);
-      setChatInput("");
+      
+      if (data.card && data.response) {
+          setCardData(data.card);
+          setChatHistory(prev => [...prev, { role: 'system', content: data.response }]);
+      } else if (data.name) { 
+          // Fallback if backend sends old format for some reason
+          setCardData(data);
+          setChatHistory(prev => [...prev, { role: 'system', content: "Card updated." }]);
+      }
     } catch (error) {
        console.error(error);
+       setChatHistory(prev => [...prev, { role: 'system', content: "Error updating card." }]);
        alert("Failed to update card.");
     } finally {
        setChatLoading(false);
@@ -123,12 +144,33 @@ function App() {
                     </Button>
                 </div>
 
-                <div className="flex-1 flex flex-col justify-end gap-2 overflow-y-auto">
-                    {/* Placeholder for chat history if properly implemented, currently just visual spacing */}
-                    <div className="flex-1 flex flex-col justify-center items-center opacity-30 text-yellow-800 text-center gap-2">
-                        <Sparkles className="h-12 w-12" />
-                        <p className="font-pixel text-sm max-w-[200px]">Enter commands to modify the generated card.</p>
-                    </div>
+                <div ref={chatScrollRef} className="flex-1 flex flex-col gap-4 overflow-y-auto p-2 scroll-smooth">
+                    {chatHistory.length === 0 ? (
+                        <div className="flex-1 flex flex-col justify-center items-center opacity-30 text-yellow-800 text-center gap-2">
+                            <Sparkles className="h-12 w-12" />
+                            <p className="font-pixel text-sm max-w-[200px]">Enter commands to modify the generated card.</p>
+                        </div>
+                    ) : (
+                        chatHistory.map((msg, i) => (
+                            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[85%] rounded-lg px-3 py-2 text-xs shadow-sm ${
+                                    msg.role === 'user' 
+                                        ? 'bg-blue-500 text-white rounded-br-none' 
+                                        : 'bg-yellow-200 text-yellow-900 rounded-bl-none border border-yellow-400'
+                                }`}>
+                                    {msg.content}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                    {chatLoading && (
+                        <div className="flex justify-start">
+                             <div className="bg-yellow-200 text-yellow-900 rounded-lg rounded-bl-none border border-yellow-400 px-3 py-2 flex items-center gap-2">
+                                <Spinner className="h-4 w-4" />
+                                <span className="text-xs font-pixel">Updating...</span>
+                             </div>
+                        </div>
+                    )}
                 </div>
 
                 <form onSubmit={handleChatSubmit} className="flex gap-2 shrink-0 items-end">
@@ -138,6 +180,12 @@ function App() {
                         onChange={(e) => setChatInput(e.target.value)}
                         disabled={chatLoading} 
                         className="font-pixel text-sm min-h-[50px] max-h-[120px] active:scale-[0.99] transition-transform shadow-sm flex-1 resize-none py-3"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleChatSubmit(e);
+                            }
+                        }}
                     />
                     <Button type="submit" disabled={chatLoading} className="bg-yellow-500 text-yellow-950 hover:bg-yellow-400 h-14 w-14 shrink-0 shadow-md border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1">
                         {chatLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
