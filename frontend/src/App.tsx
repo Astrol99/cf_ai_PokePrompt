@@ -128,8 +128,8 @@ function App() {
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden">
       <header className="pixel-font bg-red-600 text-white p-4 text-center border-b-4 border-black shrink-0 relative shadow-xl z-10">
-        <h1 className="text-2xl md:text-3xl tracking-widest drop-shadow-md">
-          PokéPrompt
+        <h1 className="text-4xl md:text-5xl text-[#ffcb05] drop-shadow-[-4px_4px_0_#3c5aa6] [-webkit-text-stroke:2px_#3c5aa6]">
+          PoKéPrompt
         </h1>
         <div className="absolute top-1/2 right-4 -translate-y-1/2 w-4 h-4 rounded-full bg-blue-400 border-2 border-white shadow-[0_0_10px_#60a5fa] animate-pulse hidden md:block"></div>
         <div className="absolute top-1/2 left-4 -translate-y-1/2 gap-1 hidden md:flex">
@@ -142,12 +142,11 @@ function App() {
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         
         {/* Left Panel: Upload & Controls */}
-        <div className="w-full md:w-1/2 h-full flex flex-col p-6 gap-4 overflow-y-auto bg-slate-50 relative border-r-4 border-black/10">
            { !image ? (
               <div className="flex-1 flex flex-col">
                   <UploadZone onImageSelected={handleImageSelected} isLoading={loading} className="flex-1 h-full" />
               </div>
-           ) : (
+           ) : !cardData ? (
              <Card className="p-4 flex flex-col gap-4 bg-white shadow-xl flex-1 justify-center animate-in slide-in-from-left-10 duration-500">
                 <div className="relative aspect-video md:aspect-square rounded-none overflow-hidden border-4 border-black bg-slate-100 mb-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
                     <img src={image} alt="Upload" className="object-contain w-full h-full" />
@@ -170,29 +169,44 @@ function App() {
                     </Button>
                 </div>
              </Card>
-           )}
+           ) : (
+             <Card className="p-6 flex flex-col gap-6 bg-yellow-50 border-4 border-yellow-600 shadow-[4px_4px_0px_0px_rgba(202,138,4,1)] animate-in slide-in-from-bottom-5 flex-1 h-full relative overflow-hidden">
+                <div className="flex justify-between items-center border-b-2 border-yellow-600/20 pb-4">
+                    <h3 className="font-pixel text-lg md:text-xl flex items-center gap-2 text-yellow-800 uppercase tracking-wider">
+                        <Sparkles className="h-5 w-5" />
+                        Trainer Command
+                    </h3>
+                    <Button 
+                        size="sm"
+                        onClick={() => { setImage(null); setCardData(null); }} 
+                        className="text-xs text-yellow-800 hover:bg-yellow-200"
+                    >
+                        New Image
+                    </Button>
+                </div>
 
-           {cardData && (
-             <Card className="p-4 flex flex-col gap-4 bg-yellow-50 border-2 border-yellow-600 shadow-[4px_4px_0px_0px_rgba(202,138,4,1)] animate-in slide-in-from-bottom-5">
-                <h3 className="font-pixel text-xs md:text-sm flex items-center gap-2 text-yellow-800 uppercase tracking-wider">
-                    <Sparkles className="h-4 w-4" />
-                    Trainer Command
-                </h3>
-                <form onSubmit={handleChatSubmit} className="flex gap-2">
+                <div className="flex-1 flex flex-col justify-end gap-2 overflow-y-auto">
+                    {/* Placeholder for chat history if properly implemented, currently just visual spacing */}
+                    <div className="flex-1 flex flex-col justify-center items-center opacity-30 text-yellow-800 text-center gap-2">
+                        <Sparkles className="h-12 w-12" />
+                        <p className="font-pixel text-sm max-w-[200px]">Enter commands to modify the generated card.</p>
+                    </div>
+                </div>
+
+                <form onSubmit={handleChatSubmit} className="flex gap-2 shrink-0">
                     <Input 
                         placeholder="Ex: 'Make it a Water type'" 
                         value={chatInput} 
                         onChange={(e) => setChatInput(e.target.value)}
                         disabled={chatLoading} 
-                        className="font-pixel text-xs active:scale-[0.99] transition-transform"
+                        className="font-pixel text-sm h-12 active:scale-[0.99] transition-transform shadow-sm flex-1"
                     />
-                    <Button type="submit" disabled={chatLoading} className="bg-yellow-500 text-yellow-950 hover:bg-yellow-400">
-                        {chatLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    <Button type="submit" disabled={chatLoading} className="bg-yellow-500 text-yellow-950 hover:bg-yellow-400 h-12 w-12 shrink-0">
+                        {chatLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                     </Button>
                 </form>
              </Card>
            )}
-        </div>
 
         {/* Right Panel: Card Preview */}
         <div className="w-full md:w-1/2 h-full flex justify-center items-center bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200 relative overflow-hidden p-8 md:p-12">
@@ -214,9 +228,9 @@ function App() {
             {loading && image && <TerminalLoader />}
             
             {!image && !loading && (
-                <div className="h-[400px] w-[300px] opacity-40 select-none pointer-events-none flex flex-col items-center justify-center gap-4">
+                <div className="h-full w-[500px] opacity-40 select-none pointer-events-none flex flex-col items-center justify-center gap-4">
                    <div className="w-full h-full border-4 border-dashed border-slate-400 rounded-lg flex items-center justify-center bg-slate-100/50">
-                        <span className="font-pixel text-xs text-slate-500">Card Preview</span>
+                        <span className="font-pixel text-xs text-slate-500">Make a card out of anything...</span>
                    </div>
                 </div>
             )}
