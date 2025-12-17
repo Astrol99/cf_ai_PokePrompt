@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { UploadZone } from './components/UploadZone'
 import { PokemonCard, type CardData } from './components/PokemonCard'
 import { Button } from '@/components/ui/pixelact-ui/button'
@@ -6,8 +6,7 @@ import { Textarea } from '@/components/ui/pixelact-ui/textarea'
 import { Spinner } from '@/components/ui/pixelact-ui/spinner'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Loader2, Sparkles, Send } from 'lucide-react'
-
-import { useRef, useEffect } from 'react'
+import html2canvas from 'html2canvas';
 
 function App() {
   const [image, setImage] = useState<string | null>(null);
@@ -17,6 +16,7 @@ function App() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'system', content: string }[]>([]);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (chatScrollRef.current) {
@@ -81,6 +81,26 @@ function App() {
        alert("Failed to update card.");
     } finally {
        setChatLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!cardRef.current || !cardData) return;
+    
+    try {
+        const canvas = await html2canvas(cardRef.current, {
+            backgroundColor: null, // Transparent background if possible, or use card's bg
+            scale: 2, // Higher resolution
+            useCORS: true // For images loaded from external URLs
+        });
+        
+        const link = document.createElement('a');
+        link.download = `pokeprompt-${cardData.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error("Download failed:", err);
+        alert("Failed to download card.");
     }
   };
 
@@ -196,12 +216,23 @@ function App() {
 
         {/* Right Panel: Card Preview */}
         <div className="w-full md:w-1/2 h-full flex justify-center items-center bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200 relative overflow-hidden p-8 md:p-12">
-            
+            {cardData && (
+                <Button 
+                    onClick={handleDownload}
+                    className="!absolute !bottom-6 !right-6 !h-14 !w-14 "
+                    title="Download Card"
+                >
+                </Button>
+            )}
+
             {/* Background pattern or decoration */}
             <div className="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black/20 via-transparent to-transparent"></div>
 
+
             {cardData ? (
-                <PokemonCard data={cardData} imageUrl={image!} className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-1 animate-in zoom-in-50 slide-in-from-right-10 shadow-2xl" />
+                    <div ref={cardRef}>
+                        <PokemonCard data={cardData} imageUrl={image!} className="scale-100 md:scale-125 transition-all duration-700 hover:rotate-1 animate-in zoom-in-50 slide-in-from-right-10 shadow-2xl" />
+                    </div>
             ) : (
                 <div className="relative h-full w-[500px] flex items-center justify-center select-none pointer-events-none">
                      <div className={`w-full h-full border-4 border-dashed border-slate-400 rounded-lg flex items-center justify-center bg-slate-100/50 transition-all duration-500 ${loading ? 'blur-sm opacity-30 scale-95' : 'opacity-40'}`}>
@@ -217,7 +248,6 @@ function App() {
                 </div>
             )}
         </div>
-
       </main>
     </div>
   )
