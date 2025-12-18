@@ -7,6 +7,7 @@ type Bindings = {
   DB: D1Database
   GOOGLE_CLIENT_ID: string
   GOOGLE_CLIENT_SECRET: string
+  BETTER_AUTH_URL: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
