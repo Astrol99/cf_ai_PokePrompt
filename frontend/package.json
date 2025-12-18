@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "pnpm build && wrangler pages deploy dist --project-name pokeprompt"
+    "deploy": "pnpm build && pnpm wrangler pages deploy dist --project-name pokeprompt"
   },
   "dependencies": {
     "@hackernoon/pixel-icon-library": "^1.0.6",

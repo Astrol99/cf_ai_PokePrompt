@@ -10,6 +10,7 @@ import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 import { authClient } from './lib/auth';
 import { Avatar } from '@/components/ui/pixelact-ui/avatar'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/pixelact-ui/dialog'
 
 // API URL from environment variable (empty for dev proxy, full URL for production)
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -26,6 +27,7 @@ function App() {
   const [isDeckOpen, setIsDeckOpen] = useState(false);
   const [savedCards, setSavedCards] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const { data: session } = authClient.useSession();
 
@@ -172,7 +174,7 @@ function App() {
               body: JSON.stringify({ card: cardData, image })
           });
           if(res.ok) {
-              alert("Card saved to your Deck!");
+              setShowSaveSuccess(true);
           } else {
               throw new Error("Failed to save");
           }
@@ -193,7 +195,7 @@ function App() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden">
-      <header className="pixel-font bg-red-600 text-white p-4 text-center border-b-4 border-black shrink-0 relative shadow-xl z-10 flex justify-between items-center">
+      <header className="pixel-font bg-red-600 text-white p-4 text-center border-b-4 border-black shrink-0 relative shadow-xl z-[100] flex justify-between items-center">
         <div className="w-20 hidden md:block"></div> {/* Spacer */}
         
         <h1 className="text-4xl md:text-5xl text-[#ffcb05] drop-shadow-[-4px_4px_0_#3c5aa6] [-webkit-text-stroke:2px_#3c5aa6]">
@@ -395,37 +397,54 @@ function App() {
         </div>
       </main>
 
+      {/* Success Dialog */}
+      <Dialog open={showSaveSuccess} onOpenChange={setShowSaveSuccess}>
+          <DialogContent className="border-green-600 bg-green-50">
+              <DialogHeader>
+                  <DialogTitle className="text-green-800 flex items-center gap-2">
+                       <Sparkles className="h-6 w-6" /> Success!
+                  </DialogTitle>
+              </DialogHeader>
+              <p className="font-pixel text-sm my-4 text-green-900">
+                  Your card has been safely stored in your deck.
+              </p>
+              <DialogFooter>
+                  <Button onClick={() => setShowSaveSuccess(false)} className="bg-green-600 text-white hover:bg-green-500">
+                      Awesome!
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+
       {/* Deck Modal */}
-      {isDeckOpen && (
-          <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-              <Card className="w-full max-w-4xl h-[80vh] flex flex-col bg-slate-100 border-4 border-black shadow-2xl relative">
-                  <div className="p-4 border-b-4 border-black flex justify-between items-center bg-red-600 text-white">
-                      <h2 className="font-pixel text-2xl flex items-center gap-2"><Library /> My Deck</h2>
-                      <Button onClick={() => setIsDeckOpen(false)} className="bg-red-800 hover:bg-red-900 border-white text-white">Close</Button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-8 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200">
-                      {savedCards.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4">
-                              <Library className="h-16 w-16 opacity-50" />
-                              <p className="font-pixel text-xl">Your deck is empty!</p>
-                              <p className="text-sm">Generate some cards and save them here.</p>
-                          </div>
-                      ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                              {savedCards.map((card) => {
-                                  const cardContent = typeof card.data === 'string' ? JSON.parse(card.data) : card.data;
-                                  return (
-                                      <div key={card.id} className="scale-75 origin-top-left">
-                                         <PokemonCard data={cardContent} imageUrl={card.imageUrl || "https://via.placeholder.com/400"} />
-                                      </div>
-                                  );
-                              })}
-                          </div>
-                      )}
-                  </div>
-              </Card>
-          </div>
-      )}
+      <Dialog open={isDeckOpen} onOpenChange={setIsDeckOpen}>
+          <DialogContent className="w-full max-w-4xl h-[80vh] flex flex-col p-0 overflow-hidden bg-slate-100 border-4 border-black shadow-2xl">
+                   <div className="p-4 border-b-4 border-black flex justify-between items-center bg-red-600 text-white shrink-0">
+                       <DialogTitle className="text-2xl flex items-center gap-2 text-white"><Library /> My Deck</DialogTitle>
+                       <Button onClick={() => setIsDeckOpen(false)} className="bg-red-800 hover:bg-red-900 border-white text-white">Close</Button>
+                   </div>
+                   <div className="flex-1 overflow-y-auto p-8 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-slate-200">
+                       {savedCards.length === 0 ? (
+                           <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4">
+                               <Library className="h-16 w-16 opacity-50" />
+                               <p className="font-pixel text-xl">Your deck is empty!</p>
+                               <p className="text-sm">Generate some cards and save them here.</p>
+                           </div>
+                       ) : (
+                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                               {savedCards.map((card) => {
+                                   const cardContent = typeof card.data === 'string' ? JSON.parse(card.data) : card.data;
+                                   return (
+                                       <div key={card.id} className="scale-75 origin-top-left">
+                                          <PokemonCard data={cardContent} imageUrl={card.imageUrl || "https://via.placeholder.com/400"} />
+                                       </div>
+                                   );
+                               })}
+                           </div>
+                       )}
+                   </div>
+          </DialogContent>
+      </Dialog>
     </div>
   )
 }
