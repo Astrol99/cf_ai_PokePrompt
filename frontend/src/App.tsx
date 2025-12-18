@@ -58,7 +58,9 @@ function App() {
   // Fetch deck when opening modal
   useEffect(() => {
       if (isDeckOpen && session) {
-          fetch(`${API_URL}/api/cards`)
+          fetch(`${API_URL}/api/cards`, {
+            credentials: 'include'
+          })
             .then(res => res.json())
             .then(data => {
               if (Array.isArray(data)) setSavedCards(data);
@@ -166,6 +168,7 @@ function App() {
               headers: { 
                   'Content-Type': 'application/json',
               },
+              credentials: 'include',
               body: JSON.stringify({ card: cardData, image })
           });
           if(res.ok) {
